@@ -1,25 +1,20 @@
-import React from 'react'
-import RegisterView from '../components/RegisterView'
-import { app } from '../configFirebase'
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, collection, setDoc } from "firebase/firestore";
-const auth = getAuth(app);
+import React, { useEffect, useState } from 'react'
+import RegisterView from '../components/RegisterView';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import {
+    auth,
+    registerWithEmailAndPassword,
+    signInWithGoogle,
+  } from "../firebaseConfig";
+
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-    const firestore = getFirestore(app);
+    const [user, loading, error] = useAuthState(auth);
+    const navigate = useNavigate();
 
     async function registrarUsuario(email: string, password: string, rol: string) {
-        const infoUsuario = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        ).then((usuarioFirebase) => {
-            return usuarioFirebase;
-        });
-
-        console.log(infoUsuario.user.uid);
-        const docuRef = doc(firestore, `usuarios/${infoUsuario.user.uid}`);
-        setDoc(docuRef, { correo: email, rol: rol, algo:"algo extra" });
+        registerWithEmailAndPassword(rol,email,password);
     }
 
     function submitHandler(e: any) {
@@ -35,9 +30,16 @@ const Register = () => {
 
     }
 
-  return (
-    <RegisterView submitHandler={(e: any) => submitHandler(e)}></RegisterView>
-  )
+    useEffect(() => {
+        if (loading) return;
+        if (user) navigate("/dashboard");
+      }, [user, loading]);
+
+    return (
+        <div>
+            <RegisterView submitHandler={(e: any) => submitHandler(e)}></RegisterView>
+        </div>
+    )
 }
 
 export default Register

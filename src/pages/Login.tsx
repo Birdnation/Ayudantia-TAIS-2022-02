@@ -1,16 +1,13 @@
-import React, { useState } from 'react'
-import LoginView from '../components/LoginView'
-import { app } from '../configFirebase'
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, doc, collection, setDoc } from "firebase/firestore";
-const auth = getAuth(app);
+import React, { useEffect, useState } from 'react'
+import LoginView from '../components/LoginView';
+import { auth, logInWithEmailAndPassword, signInWithGoogle } from "../firebaseConfig";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = () => {
-
-    const firestore = getFirestore(app);
-
-    const [error, setError]: any = useState(null);
-
+    const [user, loading, error] = useAuthState(auth);
+    const navigate = useNavigate();
     function submitHandler(e: any) {
         e.preventDefault();
 
@@ -19,28 +16,27 @@ const Login = () => {
 
         console.log("submit", email, password);
 
-        signInWithEmailAndPassword(auth, email, password).then().catch(function (error) {
-            setError(error);
-        });
+        logInWithEmailAndPassword(email,password);
+        
 
     }
-
 
     function iniciarConGoogle(e: any) {
-
-        const provider = new GoogleAuthProvider();
-        
-        signInWithPopup(auth,provider).then(googleUser => {
-            const docuRef = doc(firestore, `usuarios/${googleUser.user.uid}`);
-            setDoc(docuRef, { correo: googleUser.user.email, rol: "user" });
-        });
+        signInWithGoogle();
     }
 
+    useEffect(() => {
+        if (loading) {
+          // maybe trigger a loading screen
+          return;
+        }
+        if (user) navigate("/dashboard");
+      }, [user, loading]);
     return (
         <div>
             <LoginView submitHandler={(e: any) => submitHandler(e)}></LoginView>
-            {error && <h1>Error al conectar</h1>}
             <button onClick={iniciarConGoogle}>Google</button>
+            {error && <h1>Error al conectar</h1>}
         </div>
     )
 }

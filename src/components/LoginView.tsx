@@ -1,9 +1,9 @@
 import React from 'react'
 
+
 const LoginView = ({ submitHandler }: any) => {
     return (
-        <form onSubmit={submitHandler}>
-            <h1 className='text-danger'>Login</h1>
+        <div><form onSubmit={submitHandler}>
             <label>
                 Correo electrónico:
                 <input type="email" id="email" />
@@ -18,7 +18,7 @@ const LoginView = ({ submitHandler }: any) => {
                 type="submit"
                 value={"Iniciar Sesión"}
             />
-        </form>
+        </form></div>
     )
 }
 
